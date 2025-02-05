@@ -11,6 +11,13 @@ app = FastAPI(
     title=config.PROJECT_NAME, docs_url="/api/docs", openapi_url="/api"
 )
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=env.ALLOWED_HOSTS,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.middleware("http")
 async def db_session_middleware(request: Request, call_next):

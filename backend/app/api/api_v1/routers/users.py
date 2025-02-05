@@ -3,10 +3,10 @@ import typing as t
 
 from fastapi import status
 
-from app.core.security import get_password_hash
+from app.core.security import get_password_hash, verify_password
 from app.db.models import User
 from app.db.session import get_db
-from app.db.schemas import UserCreate, UserUpdate, UserOut, UserResponse
+from app.db.schemas import UserCreate, UserUpdate, UserOut, UserResponse, LoginRequest
 
 users_router = r = APIRouter()
 
@@ -109,7 +109,7 @@ async def user_edit(
     return db_user
 
 
-@r.post("/users/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+@r.post("/signup/", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def user_create(
     user: UserCreate,
     db=Depends(get_db)
@@ -138,3 +138,22 @@ async def user_create(
     db.commit()
     db.refresh(db_user)
     return db_user
+
+
+@r.post("/login")
+def login(request: LoginRequest, db= Depends(get_db)):
+    user = db.query(User).filter(User.email == request.email).first()
+    if not user or not verify_password(request.password, user.hashed_password):
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Incorrect email or password"
+        )
+
+    return {
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "phone_number": user.phone_number,
+        "is_superuser": user.is_superuser,
+        "picture": user.picture
+    }

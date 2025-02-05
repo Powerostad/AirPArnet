@@ -3,6 +3,9 @@ import typing as t
 
 from app.db.models import Booking
 
+class LoginRequest(BaseModel):
+   email: str
+   password: str
 
 class UserBase(BaseModel):
     email: EmailStr

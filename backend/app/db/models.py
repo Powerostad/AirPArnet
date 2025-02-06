@@ -61,7 +61,15 @@ class Booking(Base):
     total_price = Column(DECIMAL(10, 2), nullable=False)
     status = Column(String(20), default='PENDING')
 
-    flight = relationship("Flight", back_populates="bookings")
+    flight = relationship(
+        "Flight",
+        back_populates="bookings",
+        foreign_keys=[flight_id]  # This relationship uses flight_id
+    )
+    return_flight = relationship(
+        "Flight",
+        foreign_keys=[return_flight_id]  # This relationship uses return_flight_id
+    )
     user = relationship("User", back_populates="bookings")
 
     __table_args__ = (

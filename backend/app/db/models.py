@@ -54,6 +54,7 @@ class Booking(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     flight_id = Column(Integer, ForeignKey('flight.id'))
+    return_flight_id = Column(Integer, ForeignKey('flight.id'), nullable=True)
     user_id = Column(Integer, ForeignKey('user.id'))
     booking_date = Column(DateTime, nullable=False)
     passengers = Column(JSON, nullable=False)

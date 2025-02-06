@@ -7,27 +7,24 @@ from app.core.security import get_password_hash, verify_password
 from app.db.models import User
 from app.db.session import get_db
 from app.db.schemas import UserCreate, UserUpdate, UserOut, UserResponse, LoginRequest
-
+from app.db.schemas import UserResponse
 users_router = r = APIRouter()
 
 
-# @r.get(
-#     "/users",
-#     response_model=t.List[User],
-#     response_model_exclude_none=True,
-# )
-# async def users_list(
-#     response: Response,
-#     db=Depends(get_db),
-#     current_user=Depends(get_current_active_superuser),
-# ):
-#     """
-#     Get all users
-#     """
-#     users = get_users(db)
-#     # This is necessary for react-admin to work
-#     response.headers["Content-Range"] = f"0-9/{len(users)}"
-#     return users
+@r.get(
+    "/users",
+    response_model=t.List[UserResponse],
+    response_model_exclude_none=True,
+)
+async def users_list(
+    response: Response,
+    db=Depends(get_db),
+):
+    """
+    Get all users
+    """
+    users = db.query(User).limit(10).all()
+    return users
 
 
 # @r.get("/users/me", response_model=User, response_model_exclude_none=True)

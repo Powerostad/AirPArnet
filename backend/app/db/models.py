@@ -40,7 +40,13 @@ class Flight(Base):
     load_capacity = Column(DECIMAL(10, 2), nullable=False)
     class_type = Column(String(50), nullable=False)
 
-    bookings = relationship("Booking", back_populates="flight")
+    bookings = relationship("Booking",
+                            back_populates="flight",
+                            foreign_keys="[Booking.flight_id]",
+                            primaryjoin="Flight.id==Booking.flight_id")
+    return_bookings = relationship("Booking",
+                                   foreign_keys="[Booking.return_flight_id]",
+                                   primaryjoin="Flight.id==Booking.return_flight_id")
     airline = relationship("Airline", back_populates="flights")
 
     __table_args__ = (

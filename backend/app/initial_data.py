@@ -51,14 +51,14 @@ def create_users(db: Session) -> List[User]:
         User(
             email="admin@example.com",
             full_name="مدیر سیستم",
-            hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+            hashed_password="$2b$12$FGcb2rqpw1woCpAeJLkil.6IW.melbNsmZv8SdzFD.3orwyG6riR2",  # "password"
             is_superuser=True,
             phone_number="09121234567"
         ),
         User(
             email="user@example.com",
             full_name="کاربر عادی",
-            hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+            hashed_password="$2b$12$FGcb2rqpw1woCpAeJLkil.6IW.melbNsmZv8SdzFD.3orwyG6riR2",  # "password"
             is_superuser=False,
             phone_number="09129876543"
         )

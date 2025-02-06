@@ -5,222 +5,229 @@ from decimal import Decimal
 import json
 from typing import List
 
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import Session
 from app.db.session import SessionLocal
 from app.db.models import User, Flight, Booking, Airline, AirlineReview, AccountMoney
 
 
-def create_airlines(db) -> List[Airline]:
-    airlines_data = [
-        {
-            "name": "ایران ایر",
-            "package_weight": Decimal("23.00"),
-            "features": json.dumps({
-                "meals": True,
-                "wifi": False,
-                "entertainment": True,
-                "baggage_insurance": True
-            }, ensure_ascii=False)
-        },
-        {
-            "name": "ماهان ایر",
-            "package_weight": Decimal("25.00"),
-            "features": json.dumps({
-                "meals": True,
+def create_airlines(db: Session) -> List[Airline]:
+    airlines = [
+        Airline(
+            name="ایران ایر",
+            package_weight=Decimal("23.00"),
+            features=json.dumps({
+                "meal": True,
                 "wifi": True,
-                "entertainment": True,
-                "baggage_insurance": True
-            }, ensure_ascii=False)
-        },
-        {
-            "name": "آسمان",
-            "package_weight": Decimal("20.00"),
-            "features": json.dumps({
-                "meals": True,
+                "entertainment": True
+            })
+        ),
+        Airline(
+            name="ماهان",
+            package_weight=Decimal("25.00"),
+            features=json.dumps({
+                "meal": True,
                 "wifi": False,
-                "entertainment": False,
-                "baggage_insurance": True
-            }, ensure_ascii=False)
-        }
+                "entertainment": True
+            })
+        ),
+        Airline(
+            name="آسمان",
+            package_weight=Decimal("20.00"),
+            features=json.dumps({
+                "meal": True,
+                "wifi": False,
+                "entertainment": False
+            })
+        )
     ]
-
-    airlines = []
-    for airline_data in airlines_data:
-        airline = Airline(**airline_data)
+    for airline in airlines:
         db.add(airline)
-        airlines.append(airline)
-
+    db.commit()
     return airlines
 
 
-def create_users(db) -> List[User]:
-    users_data = [
-        {
-            "email": "admin@flightservice.ir",
-            "full_name": "مدیر سیستم",
-            "hashed_password": "hashed_super_secure_password_123",  # In production, use proper password hashing
-            "phone_number": "09121234567",
-            "is_superuser": True
-        },
-        {
-            "email": "user1@example.com",
-            "full_name": "علی محمدی",
-            "hashed_password": "hashed_password_123",
-            "phone_number": "09129876543",
-            "is_superuser": False
-        },
-        {
-            "email": "user2@example.com",
-            "full_name": "مریم احمدی",
-            "hashed_password": "hashed_password_456",
-            "phone_number": "09123456789",
-            "is_superuser": False
-        }
+def create_users(db: Session) -> List[User]:
+    users = [
+        User(
+            email="admin@example.com",
+            full_name="مدیر سیستم",
+            hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+            is_superuser=True,
+            phone_number="09121234567"
+        ),
+        User(
+            email="user@example.com",
+            full_name="کاربر عادی",
+            hashed_password="$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",  # "password"
+            is_superuser=False,
+            phone_number="09129876543"
+        )
     ]
-
-    users = []
-    for user_data in users_data:
-        user = User(**user_data)
+    for user in users:
         db.add(user)
-        users.append(user)
-
+    db.commit()
     return users
 
 
-def create_flights(db, airlines: List[Airline]) -> None:
-    iranian_cities = [
-        "تهران", "مشهد", "اصفهان", "شیراز", "تبریز", "کیش", "قشم"
-    ]
-    international_cities = [
-        "Dubai", "Istanbul", "Frankfurt", "London", "Paris"
-    ]
+def create_flights(db: Session, airlines: List[Airline]) -> List[Flight]:
+    # Iranian cities
+    cities = ["تهران", "مشهد", "اصفهان", "شیراز", "تبریز", "کیش"]
+    # International cities
+    international_cities = ["استانبول", "دبی", "دوحه", "فرانکفورت", "لندن"]
 
-    class_types = ["Economy", "Business", "First"]
-    base_time = datetime.now().replace(hour=0, minute=0, second=0, microsecond=0)
+    flights = []
+    current_time = datetime.now()
 
+    # Create domestic flights
     for airline in airlines:
-        # Domestic Flights
-        for dep_city in iranian_cities:
-            for arr_city in iranian_cities:
+        for dep_city in cities:
+            for arr_city in cities:
                 if dep_city != arr_city:
-                    for days in range(1, 31):  # Next 30 days
-                        for class_type in class_types:
-                            departure_time = base_time + timedelta(days=days, hours=8)
-                            flight = Flight(
-                                airline_id=airline.id,
-                                flight_number=f"IR{airline.id}{days:03d}",
-                                departure_city=dep_city,
-                                arrival_city=arr_city,
-                                departure_time=departure_time,
-                                arrival_time=departure_time + timedelta(hours=2),
-                                price_per_adult=Decimal("2000000.00"),  # 2 million Rials
-                                price_per_child=Decimal("1500000.00"),
-                                price_per_baby=Decimal("500000.00"),
-                                available_seats=150,
-                                is_international=False,
-                                load_capacity=Decimal("1000.00"),
-                                class_type=class_type
-                            )
-                            db.add(flight)
+                    # Morning flight
+                    morning_dep = current_time.replace(hour=8, minute=0) + timedelta(days=1)
+                    morning_arr = morning_dep + timedelta(hours=2)
 
-        # International Flights
-        for dep_city in iranian_cities[:3]:  # Main cities only
+                    flights.append(Flight(
+                        airline_id=airline.id,
+                        flight_number=f"IR{len(flights) + 1:04d}",
+                        departure_city=dep_city,
+                        arrival_city=arr_city,
+                        departure_time=morning_dep,
+                        arrival_time=morning_arr,
+                        price_per_adult=Decimal("2500000.00"),  # 2.5M Tomans
+                        price_per_child=Decimal("1800000.00"),
+                        price_per_baby=Decimal("500000.00"),
+                        available_seats=120,
+                        is_international=False,
+                        load_capacity=Decimal("1000.00"),
+                        class_type="اکونومی"
+                    ))
+
+    # Create international flights
+    for airline in airlines:
+        for dep_city in cities[:3]:  # Only major cities have international flights
             for arr_city in international_cities:
-                for days in range(1, 31):
-                    for class_type in class_types:
-                        departure_time = base_time + timedelta(days=days, hours=12)
-                        flight = Flight(
-                            airline_id=airline.id,
-                            flight_number=f"IR{airline.id}I{days:03d}",
-                            departure_city=dep_city,
-                            arrival_city=arr_city,
-                            departure_time=departure_time,
-                            arrival_time=departure_time + timedelta(hours=5),
-                            price_per_adult=Decimal("10000000.00"),  # 10 million Rials
-                            price_per_child=Decimal("8000000.00"),
-                            price_per_baby=Decimal("2000000.00"),
-                            available_seats=200,
-                            is_international=True,
-                            load_capacity=Decimal("2000.00"),
-                            class_type=class_type
-                        )
-                        db.add(flight)
+                # Evening international flight
+                evening_dep = current_time.replace(hour=20, minute=0) + timedelta(days=1)
+                evening_arr = evening_dep + timedelta(hours=5)
+
+                flights.append(Flight(
+                    airline_id=airline.id,
+                    flight_number=f"IR{len(flights) + 1:04d}",
+                    departure_city=dep_city,
+                    arrival_city=arr_city,
+                    departure_time=evening_dep,
+                    arrival_time=evening_arr,
+                    price_per_adult=Decimal("12000000.00"),  # 12M Tomans
+                    price_per_child=Decimal("9000000.00"),
+                    price_per_baby=Decimal("2000000.00"),
+                    available_seats=180,
+                    is_international=True,
+                    load_capacity=Decimal("2000.00"),
+                    class_type="بیزینس"
+                ))
+
+    for flight in flights:
+        db.add(flight)
+    db.commit()
+    return flights
 
 
-def create_sample_bookings(db, users: List[User]) -> None:
-    flights = db.query(Flight).limit(10).all()
-
-    for user in users:
-        for flight in flights[:2]:  # 2 bookings per user
-            booking = Booking(
-                flight_id=flight.id,
-                user_id=user.id,
-                booking_date=datetime.now(),
-                passengers=json.dumps([
-                    {
-                        "type": "adult",
-                        "name": user.full_name,
-                        "national_id": "1234567890"
-                    }
-                ], ensure_ascii=False),
-                total_price=flight.price_per_adult,
-                status="CONFIRMED"
-            )
-            db.add(booking)
-
-
-def create_airline_reviews(db, users: List[User], airlines: List[Airline]) -> None:
-    reviews = [
-        "سرویس عالی و پرواز به موقع",
-        "کیفیت غذا می‌تواند بهتر باشد",
-        "تجربه پرواز خوبی بود"
+def create_bookings(db: Session, users: List[User], flights: List[Flight]) -> None:
+    # Create different booking scenarios
+    bookings = [
+        # Single passenger, one-way domestic flight
+        Booking(
+            flight_id=flights[0].id,
+            user_id=users[1].id,
+            booking_date=datetime.now(),
+            passengers=json.dumps([{
+                "type": "adult",
+                "name": "علی محمدی",
+                "national_id": "0012345678"
+            }]),
+            total_price=flights[0].price_per_adult,
+            status="CONFIRMED"
+        ),
+        # Family booking with return international flight
+        Booking(
+            flight_id=flights[-1].id,
+            return_flight_id=flights[-2].id,
+            user_id=users[1].id,
+            booking_date=datetime.now(),
+            passengers=json.dumps([
+                {
+                    "type": "adult",
+                    "name": "رضا احمدی",
+                    "national_id": "0023456789"
+                },
+                {
+                    "type": "adult",
+                    "name": "مریم احمدی",
+                    "national_id": "0034567890"
+                },
+                {
+                    "type": "child",
+                    "name": "سارا احمدی",
+                    "national_id": "0045678901"
+                }
+            ]),
+            total_price=Decimal("33000000.00"),  # Combined price for all passengers
+            status="PENDING"
+        )
     ]
 
-    for user in users:
-        for airline in airlines:
-            review = AirlineReview(
-                review_text=reviews[hash((user.id, airline.id)) % len(reviews)],
-                user_id=user.id,
-                airline_id=airline.id
-            )
-            db.add(review)
+    for booking in bookings:
+        db.add(booking)
+    db.commit()
 
 
-def create_account_money(db, users: List[User]) -> None:
-    for user in users:
-        account = AccountMoney(
-            user_id=user.id,
-            amount=Decimal("5000000.00")  # 50 million Rials
+def create_airline_reviews(db: Session, users: List[User], airlines: List[Airline]) -> None:
+    reviews = [
+        AirlineReview(
+            review_text="پرواز بسیار خوب و به موقع بود",
+            user_id=users[1].id,
+            airline_id=airlines[0].id
+        ),
+        AirlineReview(
+            review_text="سرویس غذا می‌تونست بهتر باشه",
+            user_id=users[1].id,
+            airline_id=airlines[1].id
         )
+    ]
+
+    for review in reviews:
+        db.add(review)
+    db.commit()
+
+
+def create_account_money(db: Session, users: List[User]) -> None:
+    accounts = [
+        AccountMoney(
+            user_id=users[0].id,
+            amount=Decimal("50000000.00")  # 50M Tomans
+        ),
+        AccountMoney(
+            user_id=users[1].id,
+            amount=Decimal("10000000.00")  # 10M Tomans
+        )
+    ]
+
+    for account in accounts:
         db.add(account)
+    db.commit()
 
 
 def init() -> None:
     db = SessionLocal()
     try:
-        # Create records in proper order due to foreign key constraints
+        # Create data in order of dependencies
         airlines = create_airlines(db)
-        db.commit()
-
         users = create_users(db)
-        db.commit()
-
-        create_flights(db, airlines)
-        db.commit()
-
-        create_sample_bookings(db, users)
-        db.commit()
-
+        flights = create_flights(db, airlines)
+        create_bookings(db, users, flights)
         create_airline_reviews(db, users, airlines)
-        db.commit()
-
         create_account_money(db, users)
-        db.commit()
-
-    except IntegrityError as e:
-        db.rollback()
-        print(f"Error occurred: {e}")
-        raise
     finally:
         db.close()
 

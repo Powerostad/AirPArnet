@@ -1,3 +1,6 @@
+from datetime import datetime
+from decimal import Decimal
+
 from pydantic import BaseModel, EmailStr
 import typing as t
 
@@ -46,4 +49,18 @@ class UserWithBookings(UserBase):
     class Config:
         arbitrary_types_allowed = True
 
+class BookingListSchema(BaseModel):
+    id: int
+    total_price: Decimal
+    status: str
+
+    class Config:
+        orm_mode = True
+
+class BookingSchema(BaseModel):
+    id: int
+
+
+    class Config:
+        orm_mode = True
 

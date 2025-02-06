@@ -4,6 +4,7 @@ import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.api_v1.routers.search import search_router
 from app.api.api_v1.routers.users import users_router
+from app.api.api_v1.routers.orders import order_router
 from app.core import config
 from app.db.session import SessionLocal
 
@@ -40,6 +41,7 @@ app.include_router(
     tags=["users"],
 )
 app.include_router(search_router, prefix="/api/v1", tags=["search"])
+app.include_router(order_router, prefix="/api/v1", tags=["orders"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)

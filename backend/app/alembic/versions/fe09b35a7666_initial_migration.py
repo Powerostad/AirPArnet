@@ -1,8 +1,8 @@
-"""Initial migration
+"""initial migration
 
-Revision ID: 18d5020e86cd
+Revision ID: fe09b35a7666
 Revises: 
-Create Date: 2025-02-04 17:24:23.978750-08:00
+Create Date: 2025-02-06 03:06:47.658218-08:00
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '18d5020e86cd'
+revision = 'fe09b35a7666'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -86,12 +86,14 @@ def upgrade():
     op.create_table('booking',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
     sa.Column('flight_id', sa.Integer(), nullable=True),
+    sa.Column('return_flight_id', sa.Integer(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=True),
     sa.Column('booking_date', sa.DateTime(), nullable=False),
     sa.Column('passengers', sa.JSON(), nullable=False),
     sa.Column('total_price', sa.DECIMAL(precision=10, scale=2), nullable=False),
     sa.Column('status', sa.String(length=20), nullable=True),
     sa.ForeignKeyConstraint(['flight_id'], ['flight.id'], ),
+    sa.ForeignKeyConstraint(['return_flight_id'], ['flight.id'], ),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id'),
     mysql_charset='utf8mb4',

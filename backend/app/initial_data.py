@@ -133,7 +133,7 @@ def create_flights(db: Session, airlines: List[Airline]) -> List[Flight]:
     return flights
 
 
-def create_bookings(db: Session, users: List[User], flights: List[Flight]) -> None:
+def create_bookings(db: Session, users: list[User], flights: list[Flight]) -> None:
     # Create different booking scenarios
     bookings = [
         # Single passenger, one-way domestic flight
@@ -144,7 +144,8 @@ def create_bookings(db: Session, users: List[User], flights: List[Flight]) -> No
             passengers=json.dumps([{
                 "type": "adult",
                 "name": "علی محمدی",
-                "national_id": "0012345678"
+                "national_id": "0012345678",
+                "birthdate": "1985-06-15"
             }]),
             total_price=flights[0].price_per_adult,
             status="CONFIRMED"
@@ -158,18 +159,24 @@ def create_bookings(db: Session, users: List[User], flights: List[Flight]) -> No
             passengers=json.dumps([
                 {
                     "type": "adult",
-                    "name": "رضا احمدی",
-                    "national_id": "0023456789"
+                    "first_name": "رضا",
+                    "last_name": "احمدی",
+                    "national_id": "0023456789",
+                    "birthdate": "1980-04-22"
                 },
                 {
                     "type": "adult",
-                    "name": "مریم احمدی",
-                    "national_id": "0034567890"
+                    "first_name": "مریم",
+                    "last_name": "احمدی",
+                    "national_id": "0034567890",
+                    "birthdate": "1982-09-10"
                 },
                 {
                     "type": "child",
-                    "name": "سارا احمدی",
-                    "national_id": "0045678901"
+                    "first_name": "سارا",
+                    "last_name": "احمدی",
+                    "national_id": "0045678901",
+                    "birthdate": "2015-07-30"
                 }
             ]),
             total_price=Decimal("33000000.00"),  # Combined price for all passengers

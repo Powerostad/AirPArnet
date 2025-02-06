@@ -133,7 +133,7 @@ def create_flights(db: Session, airlines: List[Airline]) -> List[Flight]:
     return flights
 
 
-def create_bookings(db: Session, users: list[User], flights: list[Flight]) -> None:
+def create_bookings(db: Session, users: List[User], flights: List[Flight]) -> None:
     # Create different booking scenarios
     bookings = [
         # Single passenger, one-way domestic flight

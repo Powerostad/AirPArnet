@@ -18,3 +18,4 @@ mysqlclient==2.1.1
 pydantic[email]==1.10.21
 pytz==2025.1
 python-dotenv==1.0.1
+pymysql==1.1.1

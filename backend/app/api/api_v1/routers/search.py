@@ -21,8 +21,6 @@ def serialize_flight(flight):
         "departure_time": flight.departure_time,
         "arrival_time": flight.arrival_time,
         "price_per_adult": flight.price_per_adult,
-        "price_per_child": flight.price_per_child,
-        "price_per_baby": flight.price_per_baby,
         "available_seats": flight.available_seats,
         "is_international": flight.is_international,
         "load_capacity": flight.load_capacity,

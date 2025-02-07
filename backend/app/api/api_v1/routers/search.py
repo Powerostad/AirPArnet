@@ -3,7 +3,7 @@ from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic.validators import datetime
 from sqlalchemy import and_
-from sqlalchemy.orm import aliased, Session
+from sqlalchemy.orm import aliased, Session, joinedload
 
 from app.db.models import Airline, Flight
 from app.db.session import get_db
@@ -11,6 +11,28 @@ from app.db.session import get_db
 
 search_router = APIRouter(prefix="/search", tags=["search"])
 
+def serialize_flight(flight):
+    """Serialize a flight object including airline information."""
+    flight_data = {
+        "id": flight.id,
+        "flight_number": flight.flight_number,
+        "departure_city": flight.departure_city,
+        "arrival_city": flight.arrival_city,
+        "departure_time": flight.departure_time,
+        "arrival_time": flight.arrival_time,
+        "price_per_adult": flight.price_per_adult,
+        "price_per_child": flight.price_per_child,
+        "price_per_baby": flight.price_per_baby,
+        "available_seats": flight.available_seats,
+        "is_international": flight.is_international,
+        "load_capacity": flight.load_capacity,
+        "class_type": flight.class_type,
+        "airline": {
+            "id": flight.airline.id,
+            "name": flight.airline.name
+        }
+    }
+    return flight_data
 
 @search_router.get("/airlines/")
 async def get_airlines(db = Depends(get_db)):
@@ -41,7 +63,7 @@ async def search_view(
     # ONE-WAY SEARCH
     # -------------------------------------------------
     if not two_sided:
-        query = db.query(Flight).join(Airline)
+        query = db.query(Flight).options(joinedload(Flight.airline)).join(Airline)
 
         # Flight type filter for departure flight.
         if flight_type.lower() == "internal":
@@ -67,7 +89,7 @@ async def search_view(
         departure_flights = query.offset(offset).limit(per_page).all()
 
         # Wrap each flight in a "segments" list to match the two-sided structure.
-        results = [{"segments": [flight]} for flight in departure_flights]
+        results = [{"segments": [serialize_flight(flight)]} for flight in departure_flights]
         return {"total_items": total_items, "flights": results}
 
     # -------------------------------------------------
@@ -84,7 +106,14 @@ async def search_view(
     ReturnFlight = aliased(Flight)
 
     # Build the query joining departure flight with its return flight.
-    query = db.query(Flight, ReturnFlight).select_from(Flight)
+    query = (
+        db.query(Flight, ReturnFlight)
+        .select_from(Flight)
+        .options(
+            joinedload(Flight.airline),
+            joinedload(ReturnFlight.airline)
+        )
+    )
 
     # --- Departure Flight Filters ---
     query = query.filter(
@@ -132,15 +161,14 @@ async def search_view(
     # Apply pagination for the round-trip results.
     total_items = query.count()
     paired_flights = query.offset(offset).limit(per_page).all()
-    # Each result is a tuple: (departure_flight, return_flight)
 
-    # Bundle each pair in a single "segments" list.
+    # Bundle each pair in a single "segments" list with serialized flight data.
     results = []
     for dep_flight, ret_flight in paired_flights:
         results.append({
             "segments": [
-                dep_flight,   # outbound flight
-                ret_flight    # return flight
+                serialize_flight(dep_flight),   # outbound flight
+                serialize_flight(ret_flight)    # return flight
             ]
         })
 

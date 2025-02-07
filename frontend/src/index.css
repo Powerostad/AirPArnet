@@ -1,0 +1,38 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: IRANYekanXFaNum;
+  font-style: normal;
+  font-weight: bold;
+  src: url("./assets/fonts/IRANYekanXFaNum-Bold.woff2") format("woff2");
+}
+
+@font-face {
+  font-family: IRANYekanXFaNum;
+  font-style: normal;
+  font-weight: normal;
+  src: url("./assets/fonts/IRANYekanXFaNum-Regular.woff2") format("woff2");
+}
+
+* {
+  font-family: "IRANYekanXFaNum";
+}
+body {
+  background-color: white;
+}
+
+.swiper-pagination-bullet {
+  background-color: gray !important;
+  width: 10px;
+  height: 10px;
+  opacity: 0.5;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: gold !important;
+  width: 12px;
+  height: 12px;
+  opacity: 1;
+}

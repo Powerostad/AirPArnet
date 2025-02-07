@@ -14,8 +14,10 @@ services:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost" ]
       interval: 10s
       retries: 5
-#    volumes:
-#      - ./mysql:/var/lib/mysql:cached
+    volumes:
+      - db-data:/var/lib/mysql:cached
+    networks:
+      - app_network
 
   backend:
     build:
@@ -30,10 +32,28 @@ services:
       - '8010:8000'
     environment:
       PYTHONPATH: .
-      DATABASE_URL: 'mysql://myuser:mypassword@172.17.0.1:3307/mydatabase'
+      DATABASE_URL: 'mysql://myuser:mypassword@mysql:3306/mydatabase'  # Updated to use service name
     depends_on:
       mysql:
         condition: service_healthy
+    networks:
+      - app_network
+
+  frontend:
+    build:
+      context: frontend
+      dockerfile: Dockerfile
+    ports:
+      - '3000:3000'
+    depends_on:
+      backend:
+        condition: service_started
+    networks:
+      - app_network
 
 volumes:
   db-data:
+
+networks:
+  app_network:
+    driver: bridge

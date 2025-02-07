@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, date
 from decimal import Decimal
 
 from pydantic import BaseModel, EmailStr
@@ -64,3 +64,15 @@ class BookingSchema(BaseModel):
     class Config:
         orm_mode = True
 
+
+class PassengerIn(BaseModel):
+    first_name: str
+    last_name: str
+    national_id: str
+    birthdate: date
+
+class CreateBookingRequest(BaseModel):
+    flight_id: int
+    return_flight_id: t.Optional[int] = None
+    passengers: t.List[PassengerIn]
+    refund: bool = False

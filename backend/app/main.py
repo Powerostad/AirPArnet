@@ -2,6 +2,8 @@ from fastapi import FastAPI
 from fastapi.requests import Request
 import uvicorn
 from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.api_v1.routers.booking import booking_router
 from app.api.api_v1.routers.search import search_router
 from app.api.api_v1.routers.users import users_router
 from app.api.api_v1.routers.orders import order_router
@@ -42,6 +44,7 @@ app.include_router(
 )
 app.include_router(search_router, prefix="/api/v1", tags=["search"])
 app.include_router(order_router, prefix="/api/v1", tags=["orders"])
+app.include_router(booking_router, prefix="/api/v1", tags=["booking"])
 
 if __name__ == "__main__":
     uvicorn.run("main:app", host="0.0.0.0", reload=True, port=8000)

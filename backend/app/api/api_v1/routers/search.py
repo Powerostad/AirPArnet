@@ -57,6 +57,9 @@ async def search_view(
     total_passengers = adult_passengers + child_passengers + baby_passengers
     offset = (page - 1) * per_page  # Calculate the offset
 
+    # Parse airlines if provided
+    airlines = airline.split(',') if airline else None
+
     # -------------------------------------------------
     # ONE-WAY SEARCH
     # -------------------------------------------------
@@ -77,8 +80,9 @@ async def search_view(
             query = query.filter(Flight.departure_time >= departure_time)
         if arrival_time:
             query = query.filter(Flight.arrival_time <= arrival_time)
-        if airline:
-            query = query.filter(Airline.name == airline)
+        if airlines:
+            # Filter for any of the specified airlines
+            query = query.filter(Airline.name.in_(airlines))
 
         # Only return flights with enough available seats.
         query = query.filter(Flight.available_seats >= total_passengers)
@@ -127,8 +131,8 @@ async def search_view(
         query = query.filter(Flight.is_international.is_(False))
     elif flight_type.lower() in ["external", "international"]:
         query = query.filter(Flight.is_international.is_(True))
-    if airline:
-        query = query.filter(Airline.name == airline)
+    if airlines:
+        query = query.filter(Airline.name.in_(airlines))
 
     # --- Return Flight Filters ---
     # Join the return flight using reversed city conditions.
@@ -150,11 +154,11 @@ async def search_view(
         query = query.filter(ReturnFlight.is_international.is_(False))
     elif flight_type.lower() in ["external", "international"]:
         query = query.filter(ReturnFlight.is_international.is_(True))
-    if airline:
-        # If filtering by the same airline for both legs,
+    if airlines:
+        # If filtering by airlines for both legs,
         # join an alias for the airline for the return flight.
         ReturnAirline = aliased(Airline)
-        query = query.join(ReturnAirline, ReturnFlight.airline).filter(ReturnAirline.name == airline)
+        query = query.join(ReturnAirline, ReturnFlight.airline).filter(ReturnAirline.name.in_(airlines))
 
     # Apply pagination for the round-trip results.
     total_items = query.count()

@@ -106,6 +106,7 @@ const SuggestionsForeign = () => {
                 <img
                   src={image.src}
                   alt={image.title}
+                  loading="lazy"
                   className="w-full h-64 object-cover transform transition-transform
                    duration-300 group-hover:scale-105 group-hover:-translate-y-2"
                 />

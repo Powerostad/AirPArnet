@@ -9,28 +9,28 @@ import { Pagination } from "swiper/modules";
 
 const images = [
   {
-    src: "./src/assets/images/homeImages/slider/isfahan.jpg",
+    src: "./src/assets/images/homeImages/slider/Isfahan.jpg",
     title: "اصفهان؛ موزه زنده ایران",
     rating: 4.5,
     hotel: 35,
     house: 48,
   },
   {
-    src: "./src/assets/images/homeImages/slider/kashan.jpg",
+    src: "./src/assets/images/homeImages/slider/Kashan.jpg",
     title: "کاشان؛ نگین کویر ایران",
     rating: 4.2,
     hotel: 20,
     house: 48,
   },
   {
-    src: "./src/assets/images/homeImages/slider/kerman.jpg",
+    src: "./src/assets/images/homeImages/slider/Kerman.jpg",
     title: " کرمان؛ شهری با هزار و یک راز",
     rating: 4,
     hotel: 20,
     house: 48,
   },
   {
-    src: "./src/assets/images/homeImages/slider/mashhad.jpg",
+    src: "./src/assets/images/homeImages/slider/Mashhad.jpg",
     title: "مشهد؛ مقصدی برای هر فصل از سال",
     rating: 4.8,
     hotel: 20,
@@ -44,7 +44,7 @@ const images = [
     house: 15,
   },
   {
-    src: "./src/assets/images/homeImages/slider/shiraz.jpg",
+    src: "./src/assets/images/homeImages/slider/Shiraz.jpg",
     title: "شیراز؛ شهر عشق و دلدادگی",
     rating: 4.8,
     hotel: 20,
